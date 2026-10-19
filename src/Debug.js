@@ -1,0 +1,3 @@
+import * as THREE from 'three';
+const line=(pts,c)=>new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts),new THREE.LineBasicMaterial({color:c,transparent:true,opacity:.88}));
+export function buildDebug(a,emitters){const r=new THREE.Group();r.name='debug';r.add(line(Object.values(a.midline),0x40e8ff));r.add(line(a.tailPts,0xffcc43));for(const l of [a.L,a.R]){r.add(line([l.scapula,l.shoulder,l.elbow,l.carpus,l.forePaw],0x40e8ff));r.add(line([l.hip,l.stifle,l.hock,l.hindPaw],0x40e8ff))}const mat=new THREE.MeshBasicMaterial({color:0xff4fba,wireframe:true,transparent:true,opacity:.18});for(const e of emitters)if(e.kind==='lobe'){const m=new THREE.Mesh(new THREE.SphereGeometry(e.r,9,6),mat);m.position.copy(e.p);r.add(m)}return r}

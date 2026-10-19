@@ -1,0 +1,9 @@
+.DS_Store
+node_modules/
+*.blend
+*.glb
+horse/
+dist/
+.env
+.env.*
+!.env.example

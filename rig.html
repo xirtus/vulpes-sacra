@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sacred Geometry Rig</title>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<style>
+  :root{
+    --ink:#0e1211; --ink-2:#171c1a; --line:#2a322e;
+    --paper:#e9ede4; --sage:#96a198; --ember:#c85a14; --brass:#d2a32b;
+    --sky:#9aa39c; --shadow:rgba(0,0,0,.48);
+  }
+  :root:not([data-theme="dark"]){
+    --ink:#f2f4ec; --ink-2:#e6eade; --line:#cdd4c6;
+    --paper:#141917; --sage:#5e685f; --ember:#a8460c; --brass:#8a6a11;
+    --shadow:rgba(30,40,34,.20);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#0e1211; --ink-2:#171c1a; --line:#2a322e;
+      --paper:#e9ede4; --sage:#96a198; --ember:#c85a14; --brass:#d2a32b;
+      --shadow:rgba(0,0,0,.48);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#0e1211; --ink-2:#171c1a; --line:#2a322e;
+    --paper:#e9ede4; --sage:#96a198; --ember:#c85a14; --brass:#d2a32b;
+    --shadow:rgba(0,0,0,.48);
+  }
+
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--sky);color:var(--paper);
+    font-family:"IBM Plex Sans",ui-sans-serif,system-ui,-apple-system,sans-serif;
+    -webkit-font-smoothing:antialiased}
+  canvas{display:block}
+  #app{position:fixed;inset:0}
+
+  #panel{position:fixed;z-index:6;left:20px;top:20px;width:min(366px,calc(100vw - 40px));
+    max-height:calc(100vh - 40px);overflow:auto;padding:18px 20px 15px;
+    background:color-mix(in srgb, var(--ink) 88%, transparent);
+    border:1px solid var(--line);border-radius:4px;
+    backdrop-filter:blur(20px);box-shadow:0 20px 60px var(--shadow);
+    scrollbar-width:thin}
+
+  .eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9.5px;
+    letter-spacing:.22em;text-transform:uppercase;color:var(--ember)}
+  h1{font-family:Spectral,Georgia,"Times New Roman",serif;font-weight:600;
+    font-size:25px;line-height:1.05;margin:5px 0 0;letter-spacing:-.005em;text-wrap:balance}
+  .lede{font-family:Spectral,Georgia,serif;font-size:12.5px;line-height:1.46;
+    color:var(--sage);margin:8px 0 0;max-width:44ch}
+  .lede em{color:var(--paper);font-style:italic}
+
+  hr{border:0;border-top:1px solid var(--line);margin:13px 0 10px}
+  .sec{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:9px;
+    letter-spacing:.2em;text-transform:uppercase;color:var(--sage);margin:0 0 8px}
+
+  .row{display:grid;grid-template-columns:88px 1fr 50px;gap:10px;align-items:center;margin:6px 0}
+  .row label{font-size:11px;color:var(--paper);letter-spacing:.005em}
+  .row output{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;
+    text-align:right;color:var(--brass);font-variant-numeric:tabular-nums}
+  input[type=range]{width:100%;height:16px;background:transparent;appearance:none;cursor:pointer}
+  input[type=range]::-webkit-slider-runnable-track{height:2px;background:var(--line);border-radius:2px}
+  input[type=range]::-moz-range-track{height:2px;background:var(--line);border-radius:2px}
+  input[type=range]::-webkit-slider-thumb{appearance:none;width:11px;height:11px;border-radius:50%;
+    background:var(--ember);margin-top:-4.5px;border:0}
+  input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--ember);border:0}
+  input[type=range]:focus-visible{outline:2px solid var(--brass);outline-offset:4px;border-radius:3px}
+
+  .controls{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 1px}
+  button{font:500 10.5px/1 "IBM Plex Sans",system-ui,sans-serif;letter-spacing:.06em;
+    border:1px solid var(--ember);border-radius:2px;padding:7px 11px;cursor:pointer;
+    background:var(--ember);color:var(--ink);transition:background .14s,color .14s,border-color .14s}
+  button.off{background:transparent;color:var(--sage);border-color:var(--line)}
+  button:hover{border-color:var(--brass)}
+  button:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+
+  table{width:100%;border-collapse:collapse;font-family:"IBM Plex Mono",ui-monospace,monospace;
+    font-size:10.5px;font-variant-numeric:tabular-nums}
+  th{text-align:left;font-weight:400;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--sage);padding:0 0 6px;border-bottom:1px solid var(--line)}
+  th:last-child,td:last-child{text-align:right}
+  td{padding:3px 0;color:var(--paper)}
+  td.expr{color:var(--brass)}
+  tr.anchor td{color:var(--ember)}
+  tbody tr:first-child td{padding-top:7px}
+
+  dl{display:grid;grid-template-columns:1fr auto;gap:3.5px 12px;margin:12px 0 0;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;font-variant-numeric:tabular-nums}
+  dt{color:var(--sage)} dd{margin:0;text-align:right;color:var(--paper)}
+
+  #status{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:7;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px;letter-spacing:.04em;
+    padding:9px 18px;border-radius:2px;color:var(--paper);
+    background:color-mix(in srgb, var(--ink) 90%, transparent);
+    border:1px solid var(--line);backdrop-filter:blur(12px);pointer-events:none}
+  #status:empty{display:none}
+  @media (prefers-reduced-motion: reduce){*{transition:none !important}}
+</style>
+
+<div id="app"></div>
+
+<div id="panel">
+  <div class="eyebrow" id="eyebrow">…</div>
+  <h1 id="title">…</h1>
+  <p class="lede" id="lede"></p>
+
+
+  <hr />
+  <div class="sec">Parameters</div>
+  <div id="controls"></div>
+
+  <div class="controls">
+    <button id="bFur" type="button">Fur</button>
+    <button id="bSkin" type="button">Skin</button>
+    <button id="bView" type="button">View</button>
+    <button id="bSpin" type="button" class="off">Turntable</button>
+  </div>
+
+  <hr />
+  <div class="sec">Derivation</div>
+  <table>
+    <thead><tr><th scope="col">Quantity</th><th scope="col">From φ</th><th scope="col">Value</th></tr></thead>
+    <tbody id="derivation"></tbody>
+  </table>
+
+  <hr />
+  <div class="sec">This specimen</div>
+  <dl id="stats"></dl>
+</div>
+
+<div id="status"></div>
+
+<script type="importmap">
+{"imports":{
+  "three":"./vendor/build/three.module.js",
+  "three/addons/":"./vendor/addons/"
+}}
+</script>
+<script type="module" src="./src/rig/app.js"></script>
+</body>
+</html>

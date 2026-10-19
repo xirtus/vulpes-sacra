@@ -1,0 +1,460 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>The Morphogenesis Rig</title>
+</head>
+<body>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" />
+<style>
+  :root{
+    --ink:#f4f5ee; --card:#ffffff; --line:#d8ddd0; --rule:#e6eade;
+    --paper:#171c19; --sage:#5d6960; --ember:#a8460c; --brass:#7d6011;
+    --code:#eef1e8;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ink:#0d1110; --card:#141a17; --line:#28302c; --rule:#232a26;
+      --paper:#e7ece2; --sage:#93a096; --ember:#d1671c; --brass:#d2a32b;
+      --code:#101614;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ink:#0d1110; --card:#141a17; --line:#28302c; --rule:#232a26;
+    --paper:#e7ece2; --sage:#93a096; --ember:#d1671c; --brass:#d2a32b;
+    --code:#101614;
+  }
+
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--ink);color:var(--paper);
+    font-family:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+    font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 28px 96px;
+    display:grid;grid-template-columns:190px minmax(0,1fr);gap:52px;align-items:start}
+  @media (max-width:880px){.wrap{grid-template-columns:1fr;gap:0}nav{position:static !important;margin:0 0 32px}}
+
+  header{max-width:1120px;margin:0 auto;padding:64px 28px 30px}
+  .eyebrow{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10px;
+    letter-spacing:.24em;text-transform:uppercase;color:var(--ember)}
+  h1{font-family:Spectral,Georgia,serif;font-weight:600;font-size:clamp(34px,5.2vw,54px);
+    line-height:1.02;letter-spacing:-.018em;margin:12px 0 0;text-wrap:balance}
+  .standfirst{font-family:Spectral,Georgia,serif;font-size:19px;line-height:1.52;
+    color:var(--sage);margin:16px 0 0;max-width:62ch}
+  .standfirst em{color:var(--paper);font-style:italic}
+  header hr{border:0;border-top:1px solid var(--line);margin:34px 0 0}
+
+  nav{position:sticky;top:28px;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:10.5px}
+  nav div{font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--sage);margin:0 0 10px}
+  nav ol{list-style:none;margin:0;padding:0;counter-reset:s;display:flex;flex-direction:column;gap:7px}
+  nav a{color:var(--sage);text-decoration:none;display:block;padding-left:22px;position:relative}
+  nav a::before{counter-increment:s;content:counter(s,decimal-leading-zero);
+    position:absolute;left:0;color:var(--line)}
+  nav a:hover,nav a:focus-visible{color:var(--ember)}
+
+  main{min-width:0}
+  section{padding:34px 0;border-top:1px solid var(--rule)}
+  section:first-child{border-top:0;padding-top:6px}
+  h2{font-family:Spectral,Georgia,serif;font-weight:600;font-size:27px;line-height:1.14;
+    margin:0 0 14px;letter-spacing:-.012em;text-wrap:balance}
+  h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ember);
+    margin:30px 0 10px;font-weight:600}
+  p{margin:0 0 14px;max-width:66ch}
+  p.note{color:var(--sage);font-size:13.5px}
+  a{color:var(--ember)}
+  strong{font-weight:600}
+  ul{margin:0 0 14px;padding-left:20px;max-width:66ch}
+  li{margin:0 0 6px}
+
+  code{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.88em;
+    background:var(--code);border:1px solid var(--line);border-radius:2px;padding:1px 5px}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:3px;
+    padding:16px 18px;overflow-x:auto;margin:0 0 18px}
+  pre code{background:0;border:0;padding:0;font-size:12px;line-height:1.62;display:block}
+  .c{color:var(--sage)}
+  .k{color:var(--ember)}
+  .n{color:var(--brass)}
+
+  table{width:100%;border-collapse:collapse;margin:0 0 18px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:12px;
+    font-variant-numeric:tabular-nums;display:block;overflow-x:auto}
+  th{text-align:left;font-weight:400;font-size:8.5px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--sage);padding:0 18px 8px 0;border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:6px 18px 6px 0;vertical-align:top;border-bottom:1px solid var(--rule)}
+  td:first-child{color:var(--ember);white-space:nowrap}
+  td.v{color:var(--brass);white-space:nowrap}
+  table.plain td:first-child{color:var(--paper)}
+
+  .cascade{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:1px;
+    background:var(--line);border:1px solid var(--line);border-radius:3px;overflow:hidden;margin:0 0 18px}
+  .cascade div{background:var(--card);padding:13px 15px}
+  .cascade b{display:block;font-size:9px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--sage);font-weight:400;margin:0 0 6px}
+  .cascade span{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:16px;color:var(--ember)}
+  .cascade em{display:block;font-style:normal;font-size:11px;color:var(--sage);margin-top:3px;
+    font-family:"IBM Plex Mono",ui-monospace,monospace}
+
+  blockquote{margin:0 0 18px;padding:14px 18px;background:var(--card);
+    border-left:2px solid var(--ember);border-radius:0 3px 3px 0}
+  blockquote p{margin:0;font-family:Spectral,Georgia,serif;font-size:15.5px;color:var(--paper)}
+
+  .rule{display:flex;gap:14px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--rule)}
+  .rule b{font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;color:var(--ember);
+    min-width:112px;font-weight:400}
+  .rule span{font-size:13.5px;color:var(--paper)}
+  footer{max-width:1120px;margin:0 auto;padding:0 28px 80px;color:var(--sage);font-size:12.5px}
+</style>
+
+<header>
+  <div class="eyebrow">Sacred geometry · morphogenesis rig</div>
+  <h1>Growing animals out of φ</h1>
+  <p class="standfirst">A harness for building creatures from closed-form
+  mathematics. You supply <em>one</em> measured number and a short declarative
+  spec; the rig supplies the skin, the pelt, the light and the console. Nine
+  species so far, from a nine-centimetre frog to a twenty-five-metre whale.
+  This is the manual for writing one — and the argument for writing it only once.</p>
+  <hr />
+</header>
+
+<div class="wrap">
+<nav>
+  <div>Contents</div>
+  <ol>
+    <li><a href="#idea">The idea</a></li>
+    <li><a href="#cascade">The φ cascade</a></li>
+    <li><a href="#anatomy">Anatomy of a spec</a></li>
+    <li><a href="#morph">Form vocabulary</a></li>
+    <li><a href="#masks">Mask vocabulary</a></li>
+    <li><a href="#coat">Coat &amp; pelt</a></li>
+    <li><a href="#oneshot">The one-shot rule</a></li>
+    <li><a href="#prompt">The prompt</a></li>
+    <li><a href="#worked">Worked example</a></li>
+    <li><a href="#scenarios">Nine scenarios</a></li>
+    <li><a href="#limits">Where it breaks</a></li>
+    <li><a href="#run">Running it</a></li>
+  </ol>
+</nav>
+
+<main>
+
+<section id="idea">
+  <h2>The idea</h2>
+  <p>Don't sculpt — grow. An animal is not a mesh someone pushed into shape; it
+  is a small number of proportions, repeated, with volume hung on them. If the
+  proportions are right the silhouette is right, and if the silhouette is right
+  the animal reads as itself from across a field.</p>
+  <p>So the rig admits exactly one measured number per species, its
+  <strong>anchor</strong>. Everything else is that anchor times a power of φ, or
+  a fraction of a length that is itself a power of φ. Skin is one continuous
+  signed-distance field. Fur is real strands placed by a low-discrepancy
+  sequence. Colour, hair length and guard-hair banding are read out of the
+  Mandelbrot set. There is no noise function, no texture, and no
+  <code>random()</code> anywhere in the project: the same input grows the
+  identical animal, hair for hair.</p>
+  <blockquote><p>The rig is species-agnostic. A spec is species-specific.
+  Nothing in <code>src/rig/</code> knows what a fox is.</p></blockquote>
+</section>
+
+<section id="cascade">
+  <h2>The φ cascade</h2>
+  <p>Choose the dimension the world already measures this animal by — withers
+  height for a quadruped, wingspan for a bird, total length for a fish — then
+  write the master lengths as powers of φ and pick the powers that land closest
+  to the real animal. This is the thesis of the whole model. Get it right and
+  the rest is bookkeeping; force it and nothing downstream will save you.</p>
+
+  <h3>Vulpes vulpes, anchored at the withers</h3>
+  <div class="cascade">
+    <div><b>withers</b><span>W</span><em>40.0 cm · measured</em></div>
+    <div><b>head + body</b><span>Wφ</span><em>64.7 cm</em></div>
+    <div><b>brush</b><span>Wφ/φ</span><em>40.0 cm</em></div>
+    <div><b>head</b><span>W/φ²</span><em>15.3 cm</em></div>
+    <div><b>ear</b><span>W/φ³</span><em>9.4 cm</em></div>
+    <div><b>elbow</b><span>W/φ</span><em>24.7 cm</em></div>
+  </div>
+  <p class="note">Those powers were not fitted to the animal. The tail comes
+  out equal to the shoulder height, the skull to 15 cm and the ear to 9 cm —
+  which is a red fox, to the centimetre.</p>
+
+  <h3>Equus ferus caballus, anchored the same way</h3>
+  <div class="cascade">
+    <div><b>withers</b><span>W</span><em>1.60 m · measured</em></div>
+    <div><b>body length</b><span>W</span><em>1.60 m</em></div>
+    <div><b>neck</b><span>W/φ</span><em>98.9 cm</em></div>
+    <div><b>head</b><span>W/φ²</span><em>61.1 cm</em></div>
+    <div><b>tail</b><span>W/φ</span><em>98.9 cm</em></div>
+    <div><b>ear</b><span>W/φ⁵</span><em>14.4 cm</em></div>
+  </div>
+  <p class="note">Body length equal to withers height is the classical "square"
+  horse, and it falls out of the cascade rather than being imposed on it.</p>
+</section>
+
+<section id="anatomy">
+  <h2>Anatomy of a spec</h2>
+  <p>One file in <code>src/species/</code>, one default export. Every dimension
+  in it is in <strong>anchor units</strong> — multiples of the anchor — so
+  changing the anchor grows the whole animal without another edit.</p>
+  <table>
+    <thead><tr><th>Field</th><th>What it is</th></tr></thead>
+    <tbody>
+      <tr><td>id, title, binomial, blurb</td><td>Identity, shown in the console.</td></tr>
+      <tr><td>anchor</td><td>The one measured number: key, label, value, range.</td></tr>
+      <tr><td>params</td><td>Extra live sliders — leanness, coat, anything the spec reads from <code>g</code>.</td></tr>
+      <tr><td>derive(W)</td><td>The φ cascade. Returns the master lengths plus a <code>table</code> for the console.</td></tr>
+      <tr><td>body(M, D, W, g)</td><td>The implicit volume, written with the form vocabulary.</td></tr>
+      <tr><td>appendages(M, D, W, g)</td><td>Lofted shells: ears, fins, frills.</td></tr>
+      <tr><td>coat(M, D, W, g)</td><td>Palette, colour layers, hair-length layers, banding.</td></tr>
+      <tr><td>flow</td><td>The lay of the coat.</td></tr>
+      <tr><td>views</td><td>Five camera directions. Distance is fitted automatically.</td></tr>
+      <tr><td>lattice, pelt</td><td>Marching-cubes cell size (anchor units) and strand count.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="morph">
+  <h2>Form vocabulary</h2>
+  <p>The spec never touches the field engine. It calls these verbs on
+  <code>M</code>, and they take anchor units throughout.</p>
+  <table>
+    <thead><tr><th>Verb</th><th>Builds</th></tr></thead>
+    <tbody>
+      <tr><td>M.trunk(table, k, per, orient)</td><td>The torso, from rows of <code>[station, topline, underline, half-width, exponent]</code>. Also defines the coat's belly line, so geometry and markings can never disagree. <code>orient: {axis:'y'}</code> stands the trunk upright for a biped, belly forward — the man's table runs [height, front, back, half-width].</td></tr>
+      <tr><td>M.chain(stations, weld, steps)</td><td>Any other swept run — neck, muzzle, jaw. Catmull-Rom, so no joins show.</td></tr>
+      <tr><td>M.st(x, y, r1, r2, n)</td><td>A station on the midline. <code>M.stAt(point, …)</code> for one off it.</td></tr>
+      <tr><td>M.blob(p, rx, ry, rz, weld)</td><td>A soft mass: skull, haunch, cheek, jowl.</td></tr>
+      <tr><td>M.at(name, x, y, z)</td><td>A named landmark the coat can find later.</td></tr>
+      <tr><td>M.frame(name, from, to)</td><td>A local frame. Give the head one and write the face as (along, up, across).</td></tr>
+      <tr><td>M.limb(side, joints, segs, opts)</td><td>A limb; registers its bones so <code>onLimb()</code> can stocking them.</td></tr>
+      <tr><td>M.goldenCurve(name, opts)</td><td>An arc of r = a·e<sup>bθ</sup> with b = ln φ/(π/2): the radius of curvature multiplies by φ every quarter turn.</td></tr>
+      <tr><td>M.curve(name, points)</td><td>A plain centreline — a mane crest, a dorsal ridge.</td></tr>
+      <tr><td>M.sweep(name, radiusFn)</td><td>Gives a curve flesh.</td></tr>
+    </tbody>
+  </table>
+  <h3>The superellipse exponent</h3>
+  <p>Every swept cross-section is a Gielis superellipse. The exponent is the
+  most useful single number in the rig: <code>2.0</code> is a plain ellipse,
+  <code>2.6–3.0</code> is the flat-sided, deep-chested section of a real
+  ribcage, and below <code>2</code> the section goes pinched and reptilian.</p>
+  <h3>The weld</h3>
+  <p>Volumes are joined with a polynomial smooth-minimum, and the weld width is
+  the last argument everywhere. Wide welds where flesh genuinely merges — a
+  thigh into a flank. Narrow welds along a chain, or the fillet bulges at every
+  shared cap and the animal comes out ringed like a caterpillar.</p>
+</section>
+
+<section id="masks">
+  <h2>Mask vocabulary</h2>
+  <p>A mask answers "where on the animal", as a pure function returning 0 to 1.
+  Markings, hair length and bare skin are all written as masks, which is why a
+  spec contains no per-pixel code. Radii are in anchor units, so a mask written
+  for a fox reads the same on a horse ten times its size.</p>
+  <table>
+    <thead><tr><th>Mask</th><th>Selects</th></tr></thead>
+    <tbody>
+      <tr><td>ventral(up, down)</td><td>Below the belly line the trunk table defined.</td></tr>
+      <tr><td>dorsal(t0, t1)</td><td>Along the back; 0 at the belly, 1 at the topline.</td></tr>
+      <tr><td>station(x0, x1)</td><td>A longitudinal band.</td></tr>
+      <tr><td>height(y0, y1)</td><td>Absolute height above the ground.</td></tr>
+      <tr><td>onLimb(r0, r1)</td><td>Near any registered limb bone.</td></tr>
+      <tr><td>onCurve(name, r0, r1)</td><td>Near a named curve — a tail, a mane crest.</td></tr>
+      <tr><td>alongCurve(name, s0, s1)</td><td>A span from a curve's root to its tip. This is how the fox gets its white tag.</td></tr>
+      <tr><td>inFrame(name, {a, b, c})</td><td>A soft box in a local frame. <code>c</code> is |across|, so left and right are written once.</td></tr>
+      <tr><td>near(mark, r0, r1)</td><td>Distance from a landmark.</td></tr>
+      <tr><td>lateral(c0, c1) · facing(dir)</td><td>How far out to the side; which way the surface faces.</td></tr>
+      <tr><td>fractal(lo, hi)</td><td>The Mandelbrot escape time at this point, thresholded.</td></tr>
+      <tr><td>all · any · not · except · scale</td><td>Combinators. <code>except(a, b)</code> is the one you reach for most.</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="coat">
+  <h2>Coat and pelt</h2>
+  <p>Colour is a stack of layers: the first is the ground colour, and each
+  later one is a palette entry painted through a mask. Hair length is the same
+  idea with lengths instead of colours. A layer may set <code>tip</code> to
+  override the colour at the end of each hair.</p>
+<pre><code><span class="c">// the black stockings of a bay, and its black tail</span>
+{ colour: <span class="n">'points'</span>, tip: <span class="n">'points'</span>, mask: all(onLeg, height(<span class="n">0.40</span>, <span class="n">0.26</span>)) },
+{ colour: <span class="n">'points'</span>, tip: <span class="n">'points'</span>, mask: onCurve(<span class="n">'tail'</span>, <span class="n">0.16</span>, <span class="n">0.070</span>) },
+</code></pre>
+  <h3>Banding</h3>
+  <p><code>band</code> says how strongly the Mandelbrot field bands each guard
+  hair — pale root, dark subterminal band, light tip. High for a wild agouti
+  coat like a fox; near zero for a horse, whose coat is barely banded at all.</p>
+  <h3>Placement</h3>
+  <p>Strands are placed by the R2 low-discrepancy sequence, the
+  two-dimensional cousin of the golden ratio, so they land the way seeds land
+  on a sunflower head: evenly, never on a grid, never in a clump. Triangles are
+  weighted by hair length as well as area, so a brush or a mane comes out dense
+  without being asked.</p>
+  <h3>Flow</h3>
+  <p>Fur combs backwards along the body by default, radiates from a landmark
+  you name (a nose), runs down below a height you give, and follows any curve
+  you list. A mane is a curve plus a long-hair layer — nothing more.</p>
+</section>
+
+<section id="oneshot">
+  <h2>The one-shot rule</h2>
+  <p>The rig exists so that a creature can be produced in a single pass. That
+  is the whole point, and it is fragile: an hour of nudging numbers by eye
+  destroys the property that made the result interesting, and usually makes the
+  animal worse, because eye-tuning optimises the current camera angle rather
+  than the anatomy.</p>
+  <div class="rule"><b>one anchor</b><span>Exactly one number about the animal comes from the world.</span></div>
+  <div class="rule"><b>φ or nothing</b><span>If a decimal is within a few percent of a power of φ, write the power.</span></div>
+  <div class="rule"><b>anchor units</b><span>No metres anywhere in a spec.</span></div>
+  <div class="rule"><b>landmark, not look</b><span>"The brisket sits at elbow height" survives a change of anchor. "A bit deeper" does not.</span></div>
+  <div class="rule"><b>no faces</b><span>Eyes, teeth and claws are the fastest route into the uncanny valley, and they are not what makes an animal read as itself.</span></div>
+  <div class="rule"><b>fix bugs only</b><span>A tail launching in the wrong direction is a bug. A silhouette you'd prefer slightly different is not.</span></div>
+  <p class="note" style="margin-top:20px">The fox in this repository was written
+  once, then tuned for an hour. The tuning fixed three real bugs — a
+  signed-distance term that clamped to zero inside its slab, vertex colours
+  being read as linear, and smooth-min fillets bulging at every shared cap —
+  and made every aesthetic judgement worse. The horse was written once and
+  stopped.</p>
+</section>
+
+<section id="prompt">
+  <h2>The prompt</h2>
+  <p>Paste this into a fresh session, replace the creature, and take the first
+  output. The full text lives in <code>PROMPT.md</code>.</p>
+<pre><code>You are writing one file: a species spec for the sacred-geometry rig
+at src/species/&lt;id&gt;.js. The rig already exists. You do not modify it.
+
+THE RULE: exactly one number about &lt;CREATURE&gt; may be measured from the
+world — its anchor. Every other dimension is that anchor times a power
+of φ, or a fraction of a length that is itself a power of φ. Write the
+φ expression in the source, not the decimal. All dimensions are in
+anchor units, never metres.
+
+1. Choose the anchor — the dimension the world already measures this
+   animal by.
+2. Build the φ cascade in derive(W): master lengths as powers of φ,
+   choosing the powers that land closest to the real animal.
+3. Write body(M, D, W, g) using only: trunk, chain, st, stAt, blob, at,
+   frame, limb, goldenCurve, curve, sweep.
+4. appendages() for anything too thin for a lattice.
+5. coat(): colour and hair-length layers, each a palette entry through a
+   composed mask. Set band for how agouti the coat is.
+6. flow: base direction, the landmark fur radiates from, the height it
+   runs down below, the curves it combs along.
+7. views: five directions; distances are fitted.
+
+Avoid: metres, decimals where a power of φ is close, eyes or teeth on
+the first pass, and any change justified by "it looked better".
+
+Output the complete file. Nothing else.</code></pre>
+</section>
+
+<section id="worked">
+  <h2>Worked example — what makes a horse not a large fox</h2>
+  <p>Three things, and they are all in the cascade and the flow, not in the
+  detail:</p>
+  <table class="plain">
+    <thead><tr><th>&nbsp;</th><th>Fox</th><th>Horse</th></tr></thead>
+    <tbody>
+      <tr><td>Neck</td><td class="v">a joint</td><td class="v">W/φ — a third of the animal</td></tr>
+      <tr><td>Legs</td><td class="v">under half the withers</td><td class="v">most of the withers</td></tr>
+      <tr><td>Visible hair</td><td class="v">everywhere</td><td class="v">mane, forelock, tail</td></tr>
+      <tr><td>Tail launch</td><td class="v">streams back</td><td class="v">hangs down</td></tr>
+      <tr><td>Banding</td><td class="v">0.30 — wild agouti</td><td class="v">0.16 — barely</td></tr>
+    </tbody>
+  </table>
+<pre><code><span class="c">// the barrel: a horse's chest is deep and slab-sided, and its croup</span>
+<span class="c">// stands nearly as high as its withers</span>
+M.<span class="k">trunk</span>([
+  [ <span class="n">0.470</span>, <span class="n">0.905</span>, <span class="n">0.560</span>, <span class="n">0.108</span>, <span class="n">2.6</span>],   <span class="c">// point of shoulder</span>
+  [ <span class="n">0.340</span>, <span class="n">0.985</span>, <span class="n">0.505</span>, <span class="n">0.132</span>, <span class="n">2.8</span>],   <span class="c">// withers</span>
+  [ <span class="n">0.170</span>, <span class="n">0.958</span>, <span class="n">0.470</span>, <span class="n">0.156</span>, <span class="n">3.0</span>],   <span class="c">// girth</span>
+  [-<span class="n">0.140</span>, <span class="n">0.918</span>, <span class="n">0.528</span>, <span class="n">0.126</span>, <span class="n">2.7</span>],   <span class="c">// flank</span>
+  [-<span class="n">0.420</span>, <span class="n">0.948</span>, <span class="n">0.548</span>, <span class="n">0.156</span>, <span class="n">3.0</span>],   <span class="c">// croup</span>
+]);
+
+<span class="c">// the crest — the ridge the mane grows from. A mane is a curve plus a</span>
+<span class="c">// long-hair layer, and nothing else.</span>
+M.<span class="k">curve</span>(<span class="n">'crest'</span>, [ … ]);
+<span class="k">const</span> onCrest = all(onCurve(<span class="n">'crest'</span>, <span class="n">0.115</span>, <span class="n">0.045</span>), dorsal(<span class="n">0.72</span>, <span class="n">0.98</span>));
+fur: [ { len: <span class="n">0.150</span> + <span class="n">0.130</span> * g.coat, mask: onCrest } ]</code></pre>
+</section>
+
+<section id="scenarios">
+  <h2>Nine scenarios</h2>
+  <p>Each species was written in one pass and then rendered. What follows is
+  what each one taught the rig — every entry that says "rig fix" changed
+  <code>src/rig/</code>, so no later spec can hit the same thing.</p>
+  <table>
+    <thead><tr><th>Species</th><th>Anchor</th><th>What it tested</th><th>What it taught</th></tr></thead>
+    <tbody>
+      <tr><td>Vulpes vulpes</td><td class="v">withers 40 cm</td><td>the baseline: fur, brush, markings</td><td>—</td></tr>
+      <tr><td>Equus caballus</td><td class="v">withers 1.60 m</td><td>a long neck; mane and tail as curves</td><td><strong>rig fix:</strong> views became directions with the distance fitted to the animal, so a new species frames itself</td></tr>
+      <tr><td>Mammut americanum</td><td class="v">shoulder 2.70 m</td><td>a trunk and tusks off one spiral</td><td>a narrow taper needs a narrow weld: the tusks came out ringed like bamboo until the weld dropped to a twentieth</td></tr>
+      <tr><td>Chelonoidis niger</td><td class="v">carapace 1.20 m</td><td>no hair at all; scutes</td><td><strong>rig fix:</strong> the Voronoi unwrap folded the flanks onto each other, and had to be told the girth range a dome actually presents — about a third of a turn</td></tr>
+      <tr><td>Rana temporaria</td><td class="v">snout–vent 9 cm</td><td>the smallest anchor; a wet finish; a three-joint fold</td><td><strong>rig fix:</strong> a weld wider than the station spacing bulges at every station, so the rig now clamps it. Also: <code>onLimb</code> radii must be tighter on a squat animal than on a runner</td></tr>
+      <tr><td>Balaenoptera musculus</td><td class="v">length 25 m</td><td>the largest anchor; no limbs; open water</td><td><strong>rig fix:</strong> a <code>water</code> medium — no ground, the animal hangs, the light comes down through it. Pleats belong on the true underside, gated by <code>facing</code>, not on a ventral band</td></tr>
+      <tr><td>Salmo salar</td><td class="v">fork 90 cm</td><td>lateral compression; seven fins</td><td>the trunk table needed no change at all — half-width simply became the <em>narrow</em> axis</td></tr>
+      <tr><td>Ara macao</td><td class="v">length 86 cm</td><td>a bird: folded wing, graduated tail</td><td>the whole animal is one golden section: tail L/φ, body L/φ². Feathers are the rig's weak point — see below</td></tr>
+      <tr><td>Vultur gryphus</td><td class="v">wingspan 3.00 m</td><td>the widest build; spread wings</td><td>anchoring at the wingspan puts body length at S/φ², which is a condor to the centimetre</td></tr>
+      <tr><td>Phoenicopterus roseus</td><td class="v">standing 1.30 m</td><td>nested golden sections; a leg folded under the belly; a bill that bends</td><td>the limb verb took a folded pose without change — the "backward knee" is the ankle, and the joint chain said so plainly</td></tr>
+      <tr><td>Homo sapiens</td><td class="v">standing 1.75 m</td><td>the first biped; the golden canon itself</td><td><strong>rig fix:</strong> the trunk gained an orientation — a quadruped's runs along +x with the belly down, a biped's along +y with the belly forward — and every mask followed, because all of them resolve in the animal's own frame</td></tr>
+    </tbody>
+  </table>
+  <h3>What the scenarios confirmed</h3>
+  <ul>
+    <li>Anchor units carried a factor of 280 in scale — nine centimetres to
+    twenty-five metres — without a single change to the rig.</li>
+    <li>Every unusual body plan was reachable with the same nine verbs. Nothing
+    needed a new primitive except feathers.</li>
+    <li>Four of the nine species found a genuine rig bug. All four fixes were in
+    <code>src/rig/</code>, not in the spec that found them, which is the whole
+    point of separating the two.</li>
+  </ul>
+</section>
+
+<section id="limits">
+  <h2>Where it breaks</h2>
+  <p>Recorded honestly, because a manual that only lists successes is useless
+  for deciding what to build next.</p>
+  <div class="rule"><b>feathers</b><span>There is no feather primitive. A lofted shell is a cup — right for an ear or a fin, wrong for a wing. Both birds read correctly in silhouette and poorly close up. A proper vaned-feather primitive (a rachis with two swept vanes) is the single highest-value thing to add.</span></div>
+  <div class="rule"><b>hard edges</b><span>Everything is welded with a smooth-minimum, so nothing has a crease. A tortoise's shell rim, a fish's operculum and a bird's bill line all want a sharp edge the rig cannot currently produce.</span></div>
+  <div class="rule"><b>grooves are paint</b><span>Whale pleats and scute sulci are colour, not geometry. At a distance this is invisible; in a close-up it is obvious.</span></div>
+  <div class="rule"><b>one pose</b><span>Every animal stands or hangs in the pose its spec describes. There is no skeleton to re-pose, and adding one would break the property that the whole body is one continuous field.</span></div>
+  <div class="rule"><b>coplanar surfaces</b><span>Two volumes whose surfaces nearly coincide give marching cubes a near-zero gradient, and the mesh tears. Keep a blob decisively inside or decisively outside its neighbour.</span></div>
+</section>
+
+<section id="run">
+  <h2>Running it</h2>
+<pre><code>python3 -m http.server 8080
+<span class="c"># http://localhost:8080/rig.html?species=&lt;id&gt;</span>
+
+<span class="c"># vulpes  equus  mammut  chelonia  rana</span>
+<span class="c"># balaena  salmo  psittacus  vultur</span>
+
+./build-rig.sh   <span class="c"># one self-contained file per species, into dist/ and docs/models/</span></code></pre>
+  <p>Three.js is vendored, so nothing needs the network — the files in
+  <code>docs/models/</code> open straight off disk. To add a species: write
+  <code>src/species/&lt;id&gt;.js</code>, add one line to the registry in
+  <code>src/rig/app.js</code> and one to <code>assemble-rig.mjs</code>, and load
+  <code>?species=&lt;id&gt;</code>.</p>
+  <h3>Everything, offline</h3>
+  <table class="plain">
+    <thead><tr><th>Path</th><th>Holds</th></tr></thead>
+    <tbody>
+      <tr><td>docs/manual.html</td><td>this manual</td></tr>
+      <tr><td>docs/index.html</td><td>an index of the nine models</td></tr>
+      <tr><td>docs/PROMPT.md</td><td>the one-shot species prompt</td></tr>
+      <tr><td>docs/models/*.html</td><td>nine self-contained builds, no server, no network</td></tr>
+      <tr><td>docs/src/</td><td>a copy of the rig and every spec</td></tr>
+    </tbody>
+  </table>
+</section>
+
+</main>
+</div>
+
+<footer>Sacred-geometry morphogenesis rig · φ = 1.6180339887 · golden angle 137.50776° ·
+no noise function, no texture, no random()</footer>
+</body>
+</html>
